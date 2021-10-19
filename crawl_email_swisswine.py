@@ -1,24 +1,22 @@
 from bs4 import BeautifulSoup
 import requests
 
-url = 'https://mcs.unibnf.ch/lecturers-list/page/1/'
+url = 'https://deutschschweiz.swisswine.ch/de/produzent?page=1'
 response = requests.get(url)
-print(url)
 
 html = BeautifulSoup(response.text, 'html.parser')
 
 def get_this_page_emails(html):
     email_list = []
-    emails = html.find_all('a', {'class': 'lecturer-email'})
+    emails = html.find_all('li', {'class': 'email'})
     for email in emails:
         try:
-            # <a href="mailto: andreas.fischer@unifr.ch" class="lecturer-email">Email</a>
-            href = email.get('href')
-            str1, email_link = href.split(': ')
+            email_link = email.find('span')
+            email_text = email_link.text
         except Exception as e:
             continue
 
-        email_list.append(email_link)
+        email_list.append(email_text)
     return email_list
 
 def get_all_emails(html):
@@ -26,10 +24,9 @@ def get_all_emails(html):
     email_list = get_this_page_emails(html)
     end = False
     while not end:
-        if pagenumber == 5:
+        if pagenumber == 55:
             end = True
-        next_url = 'https://mcs.unibnf.ch/lecturers-list/page/'+str(pagenumber)+'/'
-        print(next_url)
+        next_url = 'https://deutschschweiz.swisswine.ch/de/produzent?page='+str(pagenumber)
         next_response = requests.get(next_url)
         next_html = BeautifulSoup(next_response.text, 'html.parser')
         temp = get_this_page_emails(next_html)
